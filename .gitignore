@@ -1,0 +1,23 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Raw Dataset Archives (keep curated offline npz)
+data/MNIST/
+
+# Logs & Temporary Files
+*.log
+*.tmp
+.DS_Store
+
+# Preserved:
+# models_weights/ (pre-trained checkpoint weights)
+# data/mnist_samples.npz (curated offline test samples)
+# .vscode/ (Antigravity debug and task configurations)
