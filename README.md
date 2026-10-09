@@ -8,8 +8,9 @@
 
 To transform this repository into an educational tool for machine learning and deep learning, consult our dedicated manuals:
 
-* 📖 **[User Manual (USER_MANUAL.md)](file:///home/cyrus/Projects/Python_AI/NeuroNetWorks/USER_MANUAL.md):** Complete guide to operating the desktop application, navigating canvases, understanding interactive controls, using the Auxiliary Neural Inspector, and running hands-on self-study experiments for every module.
-* 🔬 **[Technical Architecture & Math Reference (TECHNICAL_DOCUMENTATION.md)](file:///home/cyrus/Projects/Python_AI/NeuroNetWorks/TECHNICAL_DOCUMENTATION.md):** In-depth technical breakdown of neural network architectures, layer weights, mathematical formulations (2D/1D convolutions, universal approximation, DQN equations of motion, saliency gradients), loss functions, and deep learning glossary.
+* 📖 **[User Manual (USER_MANUAL.md)](USER_MANUAL.md):** Complete guide to operating the desktop application, navigating canvases, understanding interactive controls, using the Auxiliary Neural Inspector, and running hands-on self-study experiments for every module.
+* 🔬 **[Technical Architecture & Math Reference (TECHNICAL_DOCUMENTATION.md)](TECHNICAL_DOCUMENTATION.md):** In-depth technical breakdown of neural network architectures, layer weights, mathematical formulations (2D/1D convolutions, universal approximation, DQN equations of motion, saliency gradients), loss functions, and deep learning glossary.
+* 💻 **[Source Code Technical Reference (SourceCode_Technical.md)](SourceCode_Technical.md):** Dedicated Python code manual with file-by-file breakdowns, UML architecture maps, class diagrams, tensor lifecycles, and Deep Learning implementation details.
 
 ---
 
