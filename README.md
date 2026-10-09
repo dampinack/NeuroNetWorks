@@ -44,6 +44,11 @@ Or directly with the virtual environment Python:
 ## 🌟 Interactive Modules Overview
 
 ### ✍️ 1. MNIST Handwriting Digit Recognizer & Neural Vision Inspector
+
+<p align="center">
+  <img src="docs/screenshots/01_mnist_recognizer.png" width="85%" alt="MNIST Digit Recognizer Canvas" />
+</p>
+
 * **Architecture:** Deep 2D Convolutional Neural Network (`Conv2D(1, 16) → MaxPool → Conv2D(16, 32) → MaxPool → Dense(128) → Softmax(10)`). Also supports MLP baseline comparison.
 * **Interactive Canvas:**
   * 280×280 anti-aliased drawing pad with adjustable stroke width.
@@ -59,9 +64,18 @@ Or directly with the virtual environment Python:
   * **Autograd Saliency Map:** Real-time pixel attribution gradients ($\partial y / \partial x$) showing which drawn strokes influenced the network's classification.
   * **Dense FC1 Heatmap:** 128-neuron activation grid displaying sparsity and representation patterns.
 
+<p align="center">
+  <img src="docs/screenshots/02_neural_activity_inspector.png" width="85%" alt="Auxiliary Neural Activity Inspector" />
+</p>
+
 ---
 
 ### 🌐 2. 2D Decision Boundary Playground (Multi-Layer Perceptron)
+
+<p align="center">
+  <img src="docs/screenshots/03_decision_boundaries.png" width="85%" alt="2D Decision Boundary Playground" />
+</p>
+
 * **Architecture:** Configurable MLP (1 to 3 hidden layers, 4 to 64 neurons per layer).
 * **Activations:** ReLU, Tanh, Sigmoid, GELU, LeakyReLU.
 * **Benchmark Topologies:** Interlocking Spirals (the classic non-linear benchmark), Two Moons, Concentric Circles, 4-Quadrant XOR, Gaussian Clusters.
@@ -71,6 +85,11 @@ Or directly with the virtual environment Python:
 ---
 
 ### 🌌 3. Autoencoder Latent Space Explorer & Denoising (Unsupervised Learning)
+
+<p align="center">
+  <img src="docs/screenshots/04_autoencoder_latent.png" width="85%" alt="Autoencoder 2D Latent Space Explorer" />
+</p>
+
 * **Architecture:** Deep Autoencoder with a **2D Bottleneck** $(z_1, z_2)$ (`784 → 256 → 64 → 2 → 64 → 256 → 784`).
 * **2D Latent Bottleneck Manifold:**
   * Scatter plot of 1,000 test digits projected into the 2D Cartesian plane, color-coded by digit class (0–9).
@@ -81,9 +100,18 @@ Or directly with the virtual environment Python:
   * Side-by-side comparison: **Clean Original → Corrupted Input → Neural Reconstruction → Residual Error Map**.
   * Real-time PSNR (Peak Signal-to-Noise Ratio in dB) and MSE telemetry.
 
+<p align="center">
+  <img src="docs/screenshots/05_autoencoder_denoising.png" width="85%" alt="Denoising and Reconstruction Laboratory" />
+</p>
+
 ---
 
 ### 📈 4. Universal Function Approximator (1D Regression)
+
+<p align="center">
+  <img src="docs/screenshots/06_function_approximator.png" width="85%" alt="Universal Function Approximator" />
+</p>
+
 * **Architecture:** Arbitrary-depth MLP with 2 to 128 neurons.
 * **Activations:** Tanh (smooth sigmoidal), ReLU (piecewise linear), GELU, SIREN (Sine periodic), Sigmoid.
 * **Target Curves:** $\sin(2\pi x)$, Harmonic Superposition, Damped Oscillator, Runge's Function $\frac{1}{1+25x^2}$, Square/Step Wave, Sawtooth Wave.
@@ -95,6 +123,11 @@ Or directly with the virtual environment Python:
 ---
 
 ### 📡 5. Real-Time Signal & Audio Waveform Denoising (1D-CNN)
+
+<p align="center">
+  <img src="docs/screenshots/07_signal_oscilloscope.png" width="85%" alt="Real-Time Signal and Audio Waveform Denoising" />
+</p>
+
 * **Architecture:** 1D Fully-Convolutional Neural Network with hierarchical receptive fields.
 * **Signal Generator:** Acoustic Harmonics, ECG Cardiac Pulse (P-QRS-T complex), Linear Chirp Sweep, Square Wave.
 * **Noise Distortion:** Wideband Gaussian noise, random impulsive clicks/pops, 60Hz powerline hum.
@@ -106,6 +139,11 @@ Or directly with the virtual environment Python:
 ---
 
 ### 🕹️ 6. Reinforcement Learning Cart-Pole Balancer (DQN)
+
+<p align="center">
+  <img src="docs/screenshots/08_cartpole_dqn.png" width="85%" alt="Reinforcement Learning Cart-Pole Balancer" />
+</p>
+
 * **Physics Engine:** Newtonian inverted pendulum dynamics with 4th-order numerical integration.
 * **Agent:** Deep Q-Network ($Q(s, a)$) with experience replay buffer and target network.
 * **Modes:**
