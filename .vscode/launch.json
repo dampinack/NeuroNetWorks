@@ -107,6 +107,51 @@
       }
     },
     {
+      "name": "👁️ Debug Module 6: Vision Transformer (ViT)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "args": ["--module", "6"],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "🎯 Debug Module 7: Adversarial Attack Studio",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "args": ["--module", "7"],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "🌀 Debug Module 8: 2D Toy Diffusion Model",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "args": ["--module", "8"],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
       "name": "🧪 Run Automated GUI Self-Test (--test)",
       "type": "debugpy",
       "request": "launch",

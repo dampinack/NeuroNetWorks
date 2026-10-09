@@ -25,6 +25,9 @@ from ui.modules.autoencoder_view import AutoencoderView
 from ui.modules.approximator_view import ApproximatorView
 from ui.modules.signal_view import SignalView
 from ui.modules.cartpole_view import CartPoleView
+from ui.modules.transformer_view import TransformerView
+from ui.modules.adversarial_view import AdversarialView
+from ui.modules.diffusion_view import DiffusionView
 from core.device import get_device_name
 
 class MainWindow(QMainWindow):
@@ -72,6 +75,9 @@ class MainWindow(QMainWindow):
         self.view_approximator = ApproximatorView()
         self.view_signal = SignalView()
         self.view_cartpole = CartPoleView()
+        self.view_transformer = TransformerView()
+        self.view_adversarial = AdversarialView()
+        self.view_diffusion = DiffusionView()
 
         # Wire MNIST telemetry to Auxiliary Inspector
         self.view_mnist.telemetry_ready.connect(self.aux_window.update_telemetry)
@@ -83,6 +89,9 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.view_approximator)  # Index 3
         self.stack.addWidget(self.view_signal)        # Index 4
         self.stack.addWidget(self.view_cartpole)      # Index 5
+        self.stack.addWidget(self.view_transformer)   # Index 6
+        self.stack.addWidget(self.view_adversarial)   # Index 7
+        self.stack.addWidget(self.view_diffusion)     # Index 8
 
         body_layout.addWidget(self.stack, stretch=1)
         main_layout.addLayout(body_layout, stretch=1)
@@ -188,6 +197,9 @@ class MainWindow(QMainWindow):
             ("📈", "Universal Approximator", "1D MLP Regression"),
             ("📡", "Signal Denoising", "1D-CNN Oscilloscope"),
             ("🕹️", "RL Cart-Pole Balancer", "Deep Q-Network (DQN)"),
+            ("👁️", "Vision Transformer", "Self-Attention (ViT)"),
+            ("🎯", "Adversarial Studio", "FGSM & PGD Attacks"),
+            ("🌀", "2D Toy Diffusion", "Flow Matching Generative"),
         ]
 
         self.btn_group = QButtonGroup(self)
@@ -203,8 +215,8 @@ class MainWindow(QMainWindow):
                     color: {COLOR_TEXT_SECONDARY};
                     border: 1px solid transparent;
                     border-radius: 8px;
-                    padding: 10px 14px;
-                    font-size: 12px;
+                    padding: 8px 12px;
+                    font-size: 11px;
                     font-weight: 600;
                 }}
                 QPushButton:hover {{
@@ -247,7 +259,10 @@ class MainWindow(QMainWindow):
             "Autoencoder 2D Latent Explorer & Denoising",
             "Universal Function Approximator (1D Regression)",
             "Real-Time Signal & Audio Waveform Denoising (1D-CNN)",
-            "Reinforcement Learning Cart-Pole Balancer (DQN)"
+            "Reinforcement Learning Cart-Pole Balancer (DQN)",
+            "Vision Transformer (ViT) & Multi-Head Self-Attention",
+            "Adversarial Attack Studio (FGSM & PGD Robustness)",
+            "2D Toy Diffusion Model & Flow Matching Generative Playground"
         ]
         self.status.showMessage(f"Active Module: {names[idx]}")
 

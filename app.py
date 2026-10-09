@@ -34,14 +34,14 @@ def main():
 
     window = MainWindow()
 
-    if args.module in range(6):
+    if args.module in range(9):
         window._switch_module(args.module)
         window.nav_buttons[args.module].setChecked(True)
 
     if args.test:
         print("Self-test mode: testing UI instantiation, module switching, and inference...")
-        # Verify all 6 modules render and switch without errors
-        for i in range(6):
+        # Verify all 9 modules render and switch without errors
+        for i in range(9):
             window._switch_module(i)
             print(f"Module {i} initialized successfully.")
 
@@ -74,6 +74,21 @@ def main():
         window._switch_module(5)
         window.view_cartpole._sim_step()
         print("CartPole DQN simulation step verified.")
+
+        # Test Vision Transformer View
+        window._switch_module(6)
+        window.view_transformer._run_inference()
+        print("Vision Transformer inference and attention verified.")
+
+        # Test Adversarial Attack View
+        window._switch_module(7)
+        window.view_adversarial._run_attack()
+        print("Adversarial attack execution verified.")
+
+        # Test Diffusion View
+        window._switch_module(8)
+        window.view_diffusion._update_time_slice(0.5)
+        print("2D Toy Diffusion flow sampling verified.")
 
         print("ALL NEURONETWORKS TEST CHECKS PASSED PERFECTLY!")
         return 0

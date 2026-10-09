@@ -16,7 +16,10 @@ This manual is designed as an interactive user guide to help you navigate, exper
 7. [Module 4: Universal Function Approximator (1D Regression)](#7-module-4-universal-function-approximator-1d-regression)
 8. [Module 5: Real-Time Signal & Audio Waveform Denoising (1D-CNN)](#8-module-5-real-time-signal--audio-waveform-denoising-1d-cnn)
 9. [Module 6: Reinforcement Learning Cart-Pole Balancer (DQN)](#9-module-6-reinforcement-learning-cart-pole-balancer-dqn)
-10. [Troubleshooting & Performance Tips](#10-troubleshooting--performance-tips)
+10. [Module 7: Vision Transformer (ViT) & Self-Attention Explorer](#10-module-7-vision-transformer-vit--self-attention-explorer)
+11. [Module 8: Adversarial Attack Studio & Robustness (FGSM & PGD)](#11-module-8-adversarial-attack-studio--robustness-fgsm--pgd)
+12. [Module 9: 2D Toy Diffusion Model & Flow Matching Playground](#12-module-9-2d-toy-diffusion-model--flow-matching-playground)
+13. [Troubleshooting & Performance Tips](#13-troubleshooting--performance-tips)
 
 ---
 
@@ -43,13 +46,16 @@ NeuroNetWorks provides dedicated CLI arguments for quick access and automated ve
 
 | Command | Action |
 | :--- | :--- |
-| `./launch.sh --test` | Runs the automated self-test across all 6 modules and exits. |
+| `./launch.sh --test` | Runs the automated self-test across all 9 modules and exits. |
 | `./launch.sh --module 0` | Boots directly into Module 1: MNIST Digit Recognizer. |
 | `./launch.sh --module 1` | Boots directly into Module 2: 2D Decision Boundary Playground. |
 | `./launch.sh --module 2` | Boots directly into Module 3: Autoencoder Latent Space Explorer. |
 | `./launch.sh --module 3` | Boots directly into Module 4: Universal Function Approximator. |
-| `./launch.sh --module 4` | Boots directly into Module 5: Real-Time Signal Denoising. |
-| `./launch.sh --module 5` | Boots directly into Module 6: Reinforcement Learning Cart-Pole Balancer. |
+| `./launch.sh --module 4` | Boots directly into Module 5: Signal & Audio Denoising. |
+| `./launch.sh --module 5` | Boots directly into Module 6: RL Cart-Pole Balancer. |
+| `./launch.sh --module 6` | Boots directly into Module 7: Vision Transformer (ViT). |
+| `./launch.sh --module 7` | Boots directly into Module 8: Adversarial Attack Studio. |
+| `./launch.sh --module 8` | Boots directly into Module 9: 2D Toy Diffusion Playground. |
 
 ---
 
@@ -461,23 +467,98 @@ Module 6 simulates an inverted pendulum mounted on a movable cart governed by Ne
 
 ---
 
-## 10. Troubleshooting & Performance Tips
+## 10. Module 7: Vision Transformer (ViT) & Self-Attention Explorer
 
-### 10.1 UI Responsiveness & Threading
+<p align="center">
+  <img src="docs/screenshots/09_vision_transformer.png" width="85%" alt="Vision Transformer & Multi-Head Self-Attention" />
+</p>
+
+### 10.1 Interface Layout & Core Features
+Module 7 demonstrates the **Vision Transformer (ViT)** architecture and the Scaled Dot-Product Attention mechanism that drives modern foundational models.
+* **Image Patch Grid Canvas (16 Patches):** Slices the $28\times 28$ input into a $4\times 4$ grid of $7\times 7$ visual patches ($P_0$ to $P_{15}$).
+* **Interactive Patch Querying:** Click directly on ANY patch to make it the active Attention Query! The selected query patch glows **Amber**, while all other patches receive a glowing **Cyan** overlay proportional to their attention weight.
+* **`Query = [CLS] Token` Button:** Toggles the global classification token query, revealing which patches the network relied upon to make its final class prediction.
+* **Attention Head Selector:** Inspect Head 1 (Edge Specialist), Head 2 (Global Contours), Head 3 (Loops/Intersections), Head 4 (Background Invariant), or Head Average.
+* **17×17 Attention Matrix Heatmap:** Renders the complete token-to-token attention weight matrix $\mathbf{A}_{i,j}$.
+
+### 10.2 Educational Self-Study Experiments
+> [!TIP]
+> **Experiment 1: Visualizing Head Specialization**
+> Load digit `8`. Switch between Head 1 and Head 2. Notice how Head 1 focuses on localized perimeter segments, while Head 2 connects the top loop directly to the bottom loop across the entire canvas—demonstrating ViT's global receptive field!
+>
+> **Experiment 2: Tracing the [CLS] Token**
+> Click `Query = [CLS] Token`. Observe which patches light up brightly. Notice that blank background patches receive near-zero attention, proving the model learned spatial relevance without hardcoded convolutions.
+
+---
+
+## 11. Module 8: Adversarial Attack Studio & Robustness (FGSM & PGD)
+
+<p align="center">
+  <img src="docs/screenshots/10_adversarial_attack_studio.png" width="85%" alt="Adversarial Attack Studio" />
+</p>
+
+### 11.1 Interface Layout & Core Features
+Module 8 exposes the vulnerability of deep neural networks to adversarial attacks.
+* **4-Card Side-by-Side Comparison:**
+  1. **Clean Input Image:** The unperturbed digit with baseline model prediction and confidence.
+  2. **Perturbation Noise ($\times 5$):** The amplified adversarial gradient noise $\mathbf{\eta} = \epsilon \cdot \text{sign}(\nabla_{\mathbf{x}} \mathcal{L})$.
+  3. **Adversarial Result:** The combined image $\mathbf{x}_{\text{adv}} = \text{clip}(\mathbf{x} + \mathbf{\eta}, 0, 1)$, appearing identical to the human eye.
+  4. **Attacked Probability Spectrum:** Real-time probability bars showing the sudden collapse of model confidence.
+* **Attack Method Selector:** Switch between **FGSM** (Fast Gradient Sign Method, 1-step) and **PGD** (Projected Gradient Descent, 10-step iterative attack).
+* **Perturbation Budget Slider ($\epsilon$):** Smoothly scrub $\epsilon \in [0.0, 0.40]$ to observe the exact mathematical threshold where classification flips!
+* **Targeted vs. Untargeted Objective:** Choose between causing any misclassification or maliciously forcing the model to predict a specific wrong digit (e.g., forcing a `7` to be predicted as a `3`).
+
+### 11.2 Educational Self-Study Experiments
+> [!TIP]
+> **Experiment 1: The Critical Flip Threshold**
+> Load digit `7` with FGSM. Slowly slide $\epsilon$ from $0.00$ upward. At around $\epsilon = 0.12 - 0.15$, observe how the winning class suddenly flips from `7` (99%) to `3` or `8` (80%+), despite the visual image remaining completely recognizable to you!
+>
+> **Experiment 2: FGSM vs. PGD Strength**
+> Set $\epsilon = 0.08$. Notice that FGSM might only reduce confidence, but switching to iterative **PGD** completely breaks the model at the same $\epsilon$ budget because iterative gradient steps navigate around local curvature.
+
+---
+
+## 12. Module 9: 2D Toy Diffusion Model & Flow Matching Playground
+
+<p align="center">
+  <img src="docs/screenshots/11_diffusion_flow_playground.png" width="85%" alt="2D Toy Diffusion & Flow Matching Playground" />
+</p>
+
+### 12.1 Interface Layout & Core Features
+Module 9 visualizes the mechanics of **Score-Based Diffusion Models (DDPM)** and **Continuous Optimal Transport Flow Matching**.
+* **2D Particle Canvas:** Renders 400 particles transitioning from standard Gaussian noise $\mathcal{N}(0, \mathbf{I})$ into structured 2D geometric manifolds.
+* **Velocity Streamlines Overlay:** Displays the neural vector field $\mathbf{v}_\theta(\mathbf{x}, t)$ as directional flow streamlines guiding particle motion.
+* **Interactive Time Controller ($t \in [0, 1]$):** Scrub backward and forward in time to observe particle transportation at every intermediate time slice.
+* **`Animate Generative Flow` Button:** Plays 60 FPS real-time numerical ODE integration, watching particles self-assemble from chaotic static into clean shapes.
+* **Manifold Geometries:** Switch between Parametric Heart Curve, Swiss Roll Spiral, Two Moons, and Concentric Rings.
+
+### 12.2 Educational Self-Study Experiments
+> [!TIP]
+> **Experiment 1: Observing the Vector Field Dynamics**
+> Turn on `Render Velocity Streamlines`. Scrub the time slider from $0.0 \to 1.0$. Notice how early streamlines ($t < 0.3$) point broadly toward the center of mass, while late streamlines ($t > 0.7$) become localized and sharp, pulling particles into fine geometric boundaries!
+>
+> **Experiment 2: Swiss Roll Topological Untangling**
+> Select **Swiss Roll Spiral**. Animate the generative flow. Watch how the continuous velocity field smoothly guides Gaussian noise particles into an intertwined spiral without particles crossing or colliding catastrophically.
+
+---
+
+## 13. Troubleshooting & Performance Tips
+
+### 13.1 UI Responsiveness & Threading
 * NeuroNetWorks automatically configures thread counts via `core.device.configure_torch_threads()`, preserving at least one core for the PyQt6 GUI event loop to ensure smooth 60 FPS rendering.
 * If you experience input lag on older dual-core systems, set the environment variable:
   ```bash
   OMP_NUM_THREADS=2 ./launch.sh
   ```
 
-### 10.2 Retraining Offline Weights
+### 13.2 Retraining Offline Weights
 If any `.pth` checkpoint in `models_weights/` is deleted or you wish to retrain all models from scratch:
 ```bash
 .venv/bin/python -m core.trainer
 ```
-This script will retrain the MNIST CNN, the 2D Autoencoder, the 1D Signal Denoiser, and the Cart-Pole DQN agent in ~45 seconds.
+This script will retrain the MNIST CNN, the Vision Transformer, the 2D Autoencoder, the 1D Signal Denoiser, and the Cart-Pole DQN agent in ~60 seconds.
 
-### 10.3 Offscreen / Headless Verification
+### 13.3 Offscreen / Headless Verification
 To verify the application in headless continuous integration or without a physical display:
 ```bash
 QT_QPA_PLATFORM=offscreen .venv/bin/python app.py --test

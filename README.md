@@ -27,16 +27,19 @@ Or directly with the virtual environment Python:
 
 ### 2. Command-Line Options
 ```bash
-# Run automated self-test across all 6 modules
+# Run automated self-test across all 9 modules
 ./launch.sh --test
 
-# Launch directly into a specific module (0 to 5)
+# Launch directly into a specific module (0 to 8)
 ./launch.sh --module 0   # 0: MNIST Digit Recognizer & Auxiliary Inspector
 ./launch.sh --module 1   # 1: 2D Decision Boundary Playground
 ./launch.sh --module 2   # 2: Autoencoder Latent Space Explorer & Denoising
 ./launch.sh --module 3   # 3: Universal Function Approximator
 ./launch.sh --module 4   # 4: Real-Time Signal & Audio Waveform Denoising
 ./launch.sh --module 5   # 5: Reinforcement Learning Cart-Pole Balancer
+./launch.sh --module 6   # 6: Self-Attention & Vision Transformer (ViT) Explorer
+./launch.sh --module 7   # 7: Adversarial Attack Studio (FGSM & PGD Robustness)
+./launch.sh --module 8   # 8: 2D Toy Diffusion Model & Flow Matching Playground
 ```
 
 ---
@@ -156,6 +159,52 @@ Or directly with the virtual environment Python:
 
 ---
 
+### 👁️ 7. Self-Attention & Vision Transformer (ViT) Explorer
+
+<p align="center">
+  <img src="docs/screenshots/09_vision_transformer.png" width="85%" alt="Vision Transformer and Multi-Head Attention Explorer" />
+</p>
+
+* **Architecture:** `MiniVisionTransformer` with 16 $7\times 7$ image patches, prepended $[CLS]$ classification token, 1D learnable positional embeddings, and 2-layer Pre-LN Transformer encoder blocks.
+* **Interactive Patch Querying:** Click any patch in the $4\times 4$ token grid or select the $[CLS]$ token to dynamically re-project the full $17\times 17$ attention affinity matrix.
+* **Multi-Head Specialization:** Toggle between combined attention and individual Attention Heads (Heads 1–4) to observe head specialization (structural strokes vs. semantic background vs. class identity).
+* **Attention Heatmap Overlay:** Real-time bilinear interpolation upsampled directly onto the $28\times 28$ input digit canvas.
+
+---
+
+### 🎯 8. Adversarial Attack Studio (FGSM & PGD Robustness)
+
+<p align="center">
+  <img src="docs/screenshots/10_adversarial_attack_studio.png" width="85%" alt="Adversarial Attack Studio" />
+</p>
+
+* **Attacks:** Fast Gradient Sign Method (FGSM, single-step) and Projected Gradient Descent (PGD-10, multi-step iterative optimization).
+* **Modes:** Untargeted evasion (collapse confidence / maximize loss) and Targeted deception (force network to predict any chosen digit 0–9).
+* **Interactive 4-Card Comparison:**
+  * **Original Clean Digit:** Ground-truth class and high confidence.
+  * **Adversarial Perturbation ($\times 5$ Amplified):** Normalized bipolar gradient noise visualization showing exact adversarial directions.
+  * **Adversarial Composite ($\mathbf{x} + \boldsymbol{\delta}$):** Visually indistinguishable input image that completely fools the neural network.
+  * **Prediction Spectrum & Confusion:** Real-time bar chart showing the collapse of the true class and emergence of the adversarial target.
+* **Continuous $\epsilon$ Budget Scrubbing:** Scrub $\epsilon \in [0.00, 0.40]$ to observe the exact phase transition where the neural network's decision boundary flips.
+
+---
+
+### 🌀 9. 2D Toy Diffusion Model & Flow Matching Playground
+
+<p align="center">
+  <img src="docs/screenshots/11_diffusion_flow_playground.png" width="85%" alt="2D Toy Diffusion and Flow Matching Playground" />
+</p>
+
+* **Generative Engine:** Continuous Optimal Transport Flow Matching (OT-CFM) with `FlowFieldMLP` conditioned via sinusoidal Fourier time embeddings $\phi(t)$.
+* **Vector Streamlines Canvas:** 400 interactive particles drifting across a background velocity vector field $\mathbf{v}_\theta(\mathbf{x}, t)$ that morphs smoothly with time $t \in [0, 1]$.
+* **Target Manifolds:** Parametric Cardioid Heart, Archimedean Swiss Roll, Interlocking Two Moons, and Concentric Multi-Rings.
+* **Interactive Controls:**
+  * **60 FPS Reverse Flow Animation:** Watch particles transform from standard Gaussian white noise $\mathcal{N}(0, \mathbf{I})$ into the target geometric manifold.
+  * **Live Training:** Train the neural vector field live in the browser with real-time MSE flow loss telemetry.
+  * **Manual Scrubber:** Scrub the continuous time slider $t \in [0, 1]$ to freeze and inspect intermediate probability distributions.
+
+---
+
 ## 📁 Project Architecture
 
 ```
@@ -175,24 +224,31 @@ NeuroNetWorks/
 │   ├── approximator_models.py  # 1D Universal Approximator & basis decomposition
 │   ├── signal_models.py        # 1D-CNN Waveform Denoiser & FFT analysis
 │   ├── cartpole_models.py      # Cart-Pole Newtonian Physics & DQNAgent
+│   ├── transformer_models.py   # Vision Transformer (ViT) & Multi-Head Attention
+│   ├── adversarial_models.py   # FGSM & PGD-10 Adversarial Attack algorithms
+│   ├── diffusion_models.py     # 2D Continuous Flow Matching & Vector Field MLP
 │   └── trainer.py              # Pretraining script for offline weights
 │
 ├── ui/                         # High-performance Cyber-Lab PyQt6 GUI
 │   ├── theme.py                # Sci-Fi dark theme palette & stylesheets
-│   ├── main_window.py          # Master Shell with sidebar & status ribbon
+│   ├── main_window.py          # Master Shell with 9-module sidebar & status ribbon
 │   ├── auxiliary_window.py     # Detachable Auxiliary Neural Activity Inspector
 │   ├── custom_widgets.py       # Metric badges, sliders, cards, educational panels
 │   │
-│   └── modules/                # The 6 Dedicated Module Views
+│   └── modules/                # The 9 Dedicated Module Views
 │       ├── mnist_view.py       # Module 1: Handwriting Recognizer
 │       ├── boundary_view.py    # Module 2: 2D Decision Boundaries
 │       ├── autoencoder_view.py # Module 3: Autoencoder Latent Explorer
 │       ├── approximator_view.py# Module 4: Universal Approximator
 │       ├── signal_view.py      # Module 5: 1D Signal Denoising
-│       └── cartpole_view.py    # Module 6: Cart-Pole DQN Balancer
+│       ├── cartpole_view.py    # Module 6: Cart-Pole DQN Balancer
+│       ├── transformer_view.py # Module 7: Vision Transformer (ViT) Explorer
+│       ├── adversarial_view.py # Module 8: Adversarial Attack Studio
+│       └── diffusion_view.py   # Module 9: 2D Diffusion & Flow Matching
 │
 ├── models_weights/             # Pretrained PyTorch weights (.pth)
 │   ├── mnist_cnn.pth           # 98.6% accuracy CNN
+│   ├── mnist_vit.pth           # 94.8% accuracy Vision Transformer
 │   ├── mnist_autoencoder.pth   # 2D Latent Autoencoder
 │   ├── signal_denoiser.pth     # 1D-CNN Signal Denoiser
 │   └── cartpole_dqn.pth        # Solved Cart-Pole DQN

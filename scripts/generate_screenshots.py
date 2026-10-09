@@ -100,7 +100,33 @@ def generate():
     time.sleep(0.1)
     win.grab().save(os.path.join(SCREENSHOTS_DIR, "08_cartpole_dqn.png"))
 
-    print(f"\n✅ All 8 screen captures successfully generated in: {SCREENSHOTS_DIR}")
+    # 9. Capture Module 6: Vision Transformer & Multi-Head Attention
+    print("📸 Capturing Module 6: Vision Transformer (ViT)...")
+    win._switch_module(6)
+    win.view_transformer._load_sample(8)
+    win.view_transformer._on_patch_clicked(6)
+    app.processEvents()
+    time.sleep(0.1)
+    win.grab().save(os.path.join(SCREENSHOTS_DIR, "09_vision_transformer.png"))
+
+    # 10. Capture Module 7: Adversarial Attack Studio
+    print("📸 Capturing Module 7: Adversarial Attack Studio...")
+    win._switch_module(7)
+    win.view_adversarial._load_sample(7)
+    win.view_adversarial._on_epsilon_changed(0.18)
+    app.processEvents()
+    time.sleep(0.1)
+    win.grab().save(os.path.join(SCREENSHOTS_DIR, "10_adversarial_attack_studio.png"))
+
+    # 11. Capture Module 8: 2D Toy Diffusion Playground
+    print("📸 Capturing Module 8: 2D Toy Diffusion Model...")
+    win._switch_module(8)
+    win.view_diffusion._update_time_slice(0.55)
+    app.processEvents()
+    time.sleep(0.1)
+    win.grab().save(os.path.join(SCREENSHOTS_DIR, "11_diffusion_flow_playground.png"))
+
+    print(f"\n✅ All 11 screen captures successfully generated in: {SCREENSHOTS_DIR}")
     for f in sorted(os.listdir(SCREENSHOTS_DIR)):
         if f.endswith(".png"):
             size_kb = os.path.getsize(os.path.join(SCREENSHOTS_DIR, f)) / 1024

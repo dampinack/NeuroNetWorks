@@ -14,8 +14,11 @@ Welcome to the **NeuroNetWorks Technical Documentation**. This document is a com
 7. [Module 4: Universal Function Approximator & Basis Decomposition (`core/approximator_models.py`)](#7-module-4-universal-function-approximator--basis-decomposition-coreapproximator_modelspy)
 8. [Module 5: 1D Temporal Convolutions & Signal Denoising (`core/signal_models.py`)](#8-module-5-1d-temporal-convolutions--signal-denoising-coresignal_modelspy)
 9. [Module 6: Deep Reinforcement Learning (DQN) & Newtonian Dynamics (`core/cartpole_models.py`)](#9-module-6-deep-reinforcement-learning-dqn--newtonian-dynamics-corecartpole_modelspy)
-10. [Offline Training Pipeline & Serialization (`core/trainer.py`)](#10-offline-training-pipeline--serialization-coretrainerpy)
-11. [Comprehensive Machine Learning & Deep Learning Glossary](#11-comprehensive-machine-learning--deep-learning-glossary)
+10. [Module 7: Vision Transformer (ViT) & Multi-Head Attention (`core/transformer_models.py`)](#10-module-7-vision-transformer-vit--multi-head-attention-coretransformer_modelspy)
+11. [Module 8: Adversarial Robustness & Gradient Perturbations (`core/adversarial_models.py`)](#11-module-8-adversarial-robustness--gradient-perturbations-coreadversarial_modelspy)
+12. [Module 9: 2D Generative Diffusion & Flow Matching (`core/diffusion_models.py`)](#12-module-9-2d-generative-diffusion--flow-matching-corediffusion_modelspy)
+13. [Offline Training Pipeline & Serialization (`core/trainer.py`)](#13-offline-training-pipeline--serialization-coretrainerpy)
+14. [Comprehensive Machine Learning & Deep Learning Glossary](#14-comprehensive-machine-learning--deep-learning-glossary)
 
 ---
 
@@ -522,21 +525,232 @@ Training a neural network directly with standard temporal-difference Q-learning 
 
 ---
 
-## 10. Offline Training Pipeline & Serialization (`core/trainer.py`)
+## 10. Module 7: Vision Transformer (ViT) & Multi-Head Attention (`core/transformer_models.py`)
+
+Module 7 implements an interactive, lightweight **Vision Transformer (ViT)** based on the pioneering architecture of Dosovitskiy et al. (2020) (*"An Image is Worth 16x16 Words"*), tailored for real-time exploratory visualization of patch tokenization, spatial position encodings, multi-head self-attention maps, and representation aggregation.
+
+```
+Input Image x ∈ ℝ^[1 × 28 × 28]
+         │
+         ▼  PATCH PARTITION & LINEAR PROJECTION (P = 7 × 7, Grid = 4 × 4)
+16 Patches: x_p^(1..16) ∈ ℝ^49 ──> [Linear E: 49 → 64]
+         │
+         ▼  PREPEND CLS TOKEN & ADD LEARNABLE 1D POSITIONAL EMBEDDINGS
+Tokens: [ [CLS]; x_p^1 E; ... ; x_p^16 E ] + E_pos  ∈ ℝ^[17 × 64]
+         │
+         ▼  TRANSFORMER ENCODER (Pre-LN × 2 Layers)
+┌─────────────────────────────────────────────────────────────┐
+│  z_0 = Tokens                                               │
+│  z'_l = MHSA( LayerNorm(z_{l-1}) ) + z_{l-1}               │  (4 Heads, d_k = 16)
+│  z_l  = MLP( LayerNorm(z'_l) ) + z'_l                       │  (Expansion ratio = 2)
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼  REPRESENTATION AGGREGATION & CLASSIFICATION
+CLS Token Embedding z_L^(0) ∈ ℝ^64 ──> [LayerNorm] ──> [Linear: 64 → 10]
+         │
+         ▼
+Logits ŷ ∈ ℝ^10 ──> Softmax Probabilities
+```
+
+### 10.1 Patch Partitioning & Sequence Construction
+Standard Convolutional Neural Networks process images via local sliding receptive fields. In contrast, Vision Transformers treat 2D images as sequences of discrete visual tokens:
+
+1. An input grayscale image $\mathbf{x} \in \mathbb{R}^{H \times W \times 1}$ with $H = W = 28$ is divided into non-overlapping spatial patches of size $P \times P$ ($P = 7$):
+   $$N = \frac{H \cdot W}{P^2} = \frac{28 \times 28}{7 \times 7} = 16 \text{ patches}$$
+2. Each patch is flattened into a 1D vector $\mathbf{x}_p^{(i)} \in \mathbb{R}^{P^2} = \mathbb{R}^{49}$.
+3. Patches are projected into latent embedding dimension $D = 64$ using a learnable projection matrix $\mathbf{E} \in \mathbb{R}^{49 \times D}$ and bias $\mathbf{b} \in \mathbb{R}^D$:
+   $$\mathbf{e}_i = \mathbf{x}_p^{(i)} \mathbf{E} + \mathbf{b}, \quad i = 1, \dots, 16$$
+4. A learnable classification token $[CLS] \in \mathbb{R}^D$ is prepended to the sequence ($N+1 = 17$ tokens total), and learnable 1D spatial position embeddings $\mathbf{E}_{\text{pos}} \in \mathbb{R}^{17 \times D}$ are added element-wise:
+   $$\mathbf{z}_0 = \left[ \mathbf{x}_{\text{class}}; \mathbf{e}_1; \dots; \mathbf{e}_{16} \right] + \mathbf{E}_{\text{pos}}$$
+
+### 10.2 Scaled Dot-Product Attention & Multi-Head Specialization
+Self-attention computes dynamic, data-dependent affinity weights between all pairs of tokens in the sequence.
+
+For each attention head $h \in \{1, \dots, H\}$ (where $H = 4$, head dimension $d_k = D / H = 16$):
+1. Sequence embeddings $\mathbf{z} \in \mathbb{R}^{17 \times D}$ are mapped to **Queries** ($\mathbf{Q}_h$), **Keys** ($\mathbf{K}_h$), and **Values** ($\mathbf{V}_h$):
+   $$\mathbf{Q}_h = \mathbf{z} \mathbf{W}_h^Q, \quad \mathbf{K}_h = \mathbf{z} \mathbf{W}_h^K, \quad \mathbf{V}_h = \mathbf{z} \mathbf{W}_h^V, \quad \mathbf{W}_h^{Q, K, V} \in \mathbb{R}^{D \times d_k}$$
+2. Scaled Dot-Product Attention matrix $\mathbf{A}_h \in \mathbb{R}^{17 \times 17}$ is computed via row-wise softmax:
+   $$\mathbf{A}_h = \text{Softmax}\left( \frac{\mathbf{Q}_h \mathbf{K}_h^\top}{\sqrt{d_k}} \right)$$
+   * The $\frac{1}{\sqrt{d_k}}$ scaling factor counteracts large dot products in high dimensions that would otherwise push the softmax into vanishing gradient saturation regions.
+3. Values are pooled weighted by attention affinities:
+   $$\text{Head}_h = \mathbf{A}_h \mathbf{V}_h \in \mathbb{R}^{17 \times d_k}$$
+4. Heads are concatenated and projected through output projection $\mathbf{W}^O \in \mathbb{R}^{D \times D}$:
+   $$\text{MHSA}(\mathbf{z}) = \left[ \text{Head}_1; \text{Head}_2; \dots; \text{Head}_H \right] \mathbf{W}^O$$
+
+### 10.3 Pre-LayerNorm Transformer Encoder Blocks
+The architecture employs the **Pre-LN** configuration for improved gradient flow:
+$$\mathbf{z}'_l = \text{MHSA}\left( \text{LayerNorm}(\mathbf{z}_{l-1}) \right) + \mathbf{z}_{l-1}$$
+$$\mathbf{z}_l = \text{MLP}\left( \text{LayerNorm}(\mathbf{z}'_l) \right) + \mathbf{z}'_l$$
+
+where the Feed-Forward Network ($\text{MLP}$) applies two linear transformations with Gaussian Error Linear Unit ($\text{GELU}$) activation:
+$$\text{MLP}(\mathbf{u}) = \text{GELU}(\mathbf{u} \mathbf{W}_1 + \mathbf{b}_1) \mathbf{W}_2 + \mathbf{b}_2$$
+$$\text{GELU}(x) = x \Phi(x) = x \cdot \frac{1}{2}\left[ 1 + \text{erf}\left( \frac{x}{\sqrt{2}} \right) \right]$$
+
+### 10.4 Internal Attention Tap & Spatial Heatmap Projection
+When `return_attentions=True` is passed to `MiniVisionTransformer`, the forward pass extracts the attention tensors $\mathbf{A}_{l, h} \in \mathbb{R}^{17 \times 17}$ for every layer $l$ and head $h$.
+
+To project token attention back to the 2D pixel space for any query token $q \in \{0, \dots, 16\}$:
+1. Extract affinity row $\mathbf{a} = \mathbf{A}_{l, h}[q, 1:] \in \mathbb{R}^{16}$.
+2. Reshape into $4 \times 4$ spatial grid $M_{4 \times 4}$.
+3. Upsample $M_{4 \times 4}$ to $28 \times 28$ via bilinear interpolation to form the continuous attention overlay:
+   $$\mathcal{H}(u, v) = \text{BilinearUpsample}\left( M_{4 \times 4} \right)(u, v)$$
+
+---
+
+## 11. Module 8: Adversarial Robustness & Gradient Perturbations (`core/adversarial_models.py`)
+
+Module 8 demonstrates the vulnerability of deep neural networks to worst-case adversarial input perturbations and explores the mathematics of gradient-based evasion attacks.
+
+```
+Clean Image x ∈ [0, 1] ──> [CNN Forward] ──> True Class y (Loss ℒ(x, y))
+        │                                          │
+        │                                          ▼ [Backprop w.r.t Input]
+        │                                    Input Gradient ∇_x ℒ
+        │                                          │
+        ▼                                          ▼
+[ x ] + [ ε · sign( ∇_x ℒ ) ] ──> [Clip [0, 1]] ──> Perturbed Adversarial Image x_adv
+                                                           │
+                                                           ▼
+                                                Misclassified Class y' ≠ y!
+```
+
+### 11.1 The Linearity Hypothesis (Goodfellow et al., 2014)
+A common misconception was that adversarial vulnerability is caused by deep non-linearities and local overfitting. However, Goodfellow et al. demonstrated that adversarial vulnerability primarily stems from **excessive linearity in high-dimensional input spaces**.
+
+Consider a linear activation unit with weight vector $\mathbf{w} \in \mathbb{R}^d$ and input $\mathbf{x} \in \mathbb{R}^d$.
+If an adversary adds an imperceptible perturbation $\boldsymbol{\eta} \in \mathbb{R}^d$ constrained by $\|\boldsymbol{\eta}\|_\infty \le \epsilon$:
+$$\tilde{\mathbf{x}} = \mathbf{x} + \boldsymbol{\eta}$$
+The activation of the unit becomes:
+$$\mathbf{w}^\top \tilde{\mathbf{x}} = \mathbf{w}^\top \mathbf{x} + \mathbf{w}^\top \boldsymbol{\eta}$$
+
+To maximize this activation subject to the $L_\infty$ constraint, the adversary chooses $\boldsymbol{\eta} = \epsilon \cdot \text{sign}(\mathbf{w})$.
+The resulting activation change is:
+$$\Delta = \mathbf{w}^\top \boldsymbol{\eta} = \epsilon \|\mathbf{w}\|_1 = \epsilon \sum_{i=1}^d |w_i| = \epsilon \cdot d \cdot \bar{w}$$
+where $\bar{w}$ is the average absolute weight magnitude.
+* Even if $\epsilon$ is very small (e.g., $\epsilon = 0.15$), as dimensionality $d$ grows ($d = 784$ for MNIST, $d = 150,528$ for ImageNet), the cumulative activation shift $\Delta$ scales linearly with $d$, easily overwhelming the network's internal margins and flipping decision boundaries.
+
+### 11.2 Fast Gradient Sign Method (FGSM)
+FGSM is a single-step first-order gradient method that computes the optimal perturbation maximizing the cross-entropy loss under an $L_\infty$ norm constraint.
+
+* **Untargeted Formulation:** Maximizes classification loss for ground-truth label $y_{\text{true}}$:
+  $$\mathbf{x}_{\text{adv}} = \text{clip}_{[0, 1]} \left( \mathbf{x} + \epsilon \cdot \text{sign}\left( \nabla_\mathbf{x} \mathcal{L}(f_\theta(\mathbf{x}), y_{\text{true}}) \right) \right)$$
+* **Targeted Formulation:** Forces the model to predict a specific target class $y_{\text{target}} \ne y_{\text{true}}$ by descending the loss of the target:
+  $$\mathbf{x}_{\text{adv}} = \text{clip}_{[0, 1]} \left( \mathbf{x} - \epsilon \cdot \text{sign}\left( \nabla_\mathbf{x} \mathcal{L}(f_\theta(\mathbf{x}), y_{\text{target}}) \right) \right)$$
+
+### 11.3 Projected Gradient Descent (PGD - Madry et al., 2018)
+While FGSM takes a single large step, PGD is an iterative multi-step optimization method that computes stronger adversarial perturbations by taking small steps of size $\alpha$ and projecting back onto the $L_\infty$ $\epsilon$-ball $\mathcal{B}_\epsilon(\mathbf{x})$:
+
+$$\mathbf{x}^{(0)} = \mathbf{x} + \mathbf{\delta}_{\text{init}}, \quad \mathbf{\delta}_{\text{init}} \sim \mathcal{U}(-\epsilon, \epsilon)$$
+$$\mathbf{x}^{(t+1)} = \Pi_{\mathcal{B}_\epsilon(\mathbf{x}) \cap [0, 1]^d} \left( \mathbf{x}^{(t)} + \alpha \cdot \text{sign}\left( \nabla_{\mathbf{x}^{(t)}} \mathcal{L}(f_\theta(\mathbf{x}^{(t)}), y_{\text{true}}) \right) \right)$$
+
+where the projection operator is:
+$$\Pi_{\mathcal{B}_\epsilon(\mathbf{x}) \cap [0, 1]^d}(\mathbf{x}') = \text{clip}_{[0, 1]} \left( \text{clip}_{[\mathbf{x} - \epsilon, \mathbf{x} + \epsilon]} (\mathbf{x}') \right)$$
+Standard step size is set to $\alpha = \frac{2\epsilon}{T}$ where $T$ is the number of steps (e.g., $T = 10$).
+
+### 11.4 Perturbation Distance Metrics
+To quantify the visual and numerical distortion introduced by the attack:
+* **$L_\infty$ Chebyshev Distance:** Maximum absolute pixel change:
+  $$\|\boldsymbol{\delta}\|_\infty = \max_{i} |\tilde{x}_i - x_i|$$
+* **$L_2$ Euclidean Distance:** Root-mean-square perturbation energy:
+  $$\|\boldsymbol{\delta}\|_2 = \sqrt{\sum_{i=1}^d (\tilde{x}_i - x_i)^2}$$
+* **$L_0$ Hamming Sparsity:** Count of modified pixels:
+  $$\|\boldsymbol{\delta}\|_0 = \sum_{i=1}^d \mathbb{I}(|\tilde{x}_i - x_i| > 10^{-4})$$
+
+---
+
+## 12. Module 9: 2D Generative Diffusion & Flow Matching (`core/diffusion_models.py`)
+
+Module 9 demonstrates continuous generative modeling, probability density transport, and neural ordinary differential equations (Neural ODEs) using **Optimal Transport Flow Matching (OT-CFM)** and **Continuous Diffusion**.
+
+```
+PRIOR DISTRIBUTION p_0(x)                                    TARGET DISTRIBUTION q(x)
+Standard Gaussian N(0, I)                                  (Heart, Swiss Roll, Rings)
+        │                                                              │
+        │             TIME t ∈ [0, 1] CONTINUOUS INTERPOLATION          │
+        └───────────────────────────────┬──────────────────────────────┘
+                                        ▼
+                   Coupled Point: x_t = (1 - t) x_0 + t x_1
+                                        │
+                                        ▼  GROUND-TRUTH VELOCITY: u_t = x_1 - x_0
+                   Loss: ‖ v_θ(x_t, t) - (x_1 - x_0) ‖²
+                                        │
+                                        ▼  TRAINED NEURAL VECTOR FIELD
+                   v_θ(x, t): ℝ² × [0, 1] ──> ℝ² (Velocity Vectors)
+                                        │
+                                        ▼  SAMPLING VIA NUMERICAL ODE
+                   dx/dt = v_θ(x, t),   x(0) ~ N(0, I) ──> Generated Samples x(1)
+```
+
+### 12.1 Continuous Optimal Transport Flow Matching vs. DDPM
+Standard Denoising Diffusion Probabilistic Models (DDPM; Ho et al., 2020) define forward transitions via stochastic Gaussian noise addition:
+$$q(x_t \mid x_0) = \mathcal{N}\left( x_t; \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t)\mathbf{I} \right)$$
+which results in curved, stochastic Brownian trajectories that require many sampling steps (50–1000) to invert.
+
+**Flow Matching (Lipman et al., 2022)** constructs continuous generative models using deterministic velocity vector fields $v_t(x)$. Under the **Optimal Transport (OT)** formulation:
+1. Sample prior noise $\mathbf{x}_0 \sim p_0(\mathbf{x}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$.
+2. Sample target data point $\mathbf{x}_1 \sim q(\mathbf{x})$.
+3. Define the straight-line probability trajectory:
+   $$\mathbf{x}_t = (1 - t)\mathbf{x}_0 + t\mathbf{x}_1, \quad t \in [0, 1]$$
+4. The exact target velocity vector field along this trajectory is constant:
+   $$\mathbf{u}_t(\mathbf{x}_t \mid \mathbf{x}_0, \mathbf{x}_1) = \frac{d\mathbf{x}_t}{dt} = \mathbf{x}_1 - \mathbf{x}_0$$
+5. The neural network $v_\theta(\mathbf{x}, t)$ is trained via Conditional Flow Matching (CFM) with simple Mean Squared Error:
+   $$\mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t \sim \mathcal{U}(0, 1), \mathbf{x}_0 \sim p_0, \mathbf{x}_1 \sim q} \left[ \left\| v_\theta(\mathbf{x}_t, t) - (\mathbf{x}_1 - \mathbf{x}_0) \right\|^2 \right]$$
+
+Because optimal transport trajectories are straight lines in feature space, generative inference is numerically well-behaved and can be solved in as few as 20–50 Euler steps.
+
+### 12.2 Sinusoidal Time Conditioning (`FlowFieldMLP`)
+To provide the network with continuous time awareness across scales, the scalar timestamp $t \in [0, 1]$ is encoded into high-dimensional sinusoidal Fourier features:
+$$\phi(t) = \left[ \sin(2^0 \pi t), \cos(2^0 \pi t), \sin(2^1 \pi t), \cos(2^1 \pi t), \dots, \sin(2^{K-1} \pi t), \cos(2^{K-1} \pi t) \right]^\top \in \mathbb{R}^{2K}$$
+with $K = 8$ frequency octaves ($2K = 16$ dimensions).
+
+The spatial position $\mathbf{x} \in \mathbb{R}^2$ is concatenated with $\phi(t)$ and passed through a Multi-Layer Perceptron with SiLU (Swish) activations:
+$$\mathbf{h}_0 = [\mathbf{x}; \phi(t)] \in \mathbb{R}^{18}$$
+$$\mathbf{h}_1 = \text{SiLU}(\mathbf{h}_0 \mathbf{W}_1 + \mathbf{b}_1), \quad \mathbf{h}_2 = \text{SiLU}(\mathbf{h}_1 \mathbf{W}_2 + \mathbf{b}_2), \quad \dots$$
+$$\mathbf{v}_\theta(\mathbf{x}, t) = \mathbf{h}_L \mathbf{W}_{\text{out}} + \mathbf{b}_{\text{out}} \in \mathbb{R}^2$$
+
+where $\text{SiLU}(z) = z \cdot \sigma(z) = \frac{z}{1 + e^{-z}}$.
+
+### 12.3 Generative Sampling via Numerical ODE Integration
+To synthesize new points from pure noise:
+1. Initialize particle positions $\mathbf{X}^{(0)} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$.
+2. Discretize the time interval $[0, 1]$ into $M$ integration intervals with step size $\Delta t = 1 / M$.
+3. Advance particles using **Euler Integration**:
+   $$\mathbf{X}^{(k+1)} = \mathbf{X}^{(k)} + \Delta t \cdot v_\theta\left( \mathbf{X}^{(k)}, t_k \right), \quad t_k = k \cdot \Delta t$$
+   Or optionally using the higher-order **Midpoint Runge-Kutta 2 (RK2)** method:
+   $$\mathbf{k}_1 = v_\theta(\mathbf{X}^{(k)}, t_k)$$
+   $$\mathbf{k}_2 = v_\theta\left( \mathbf{X}^{(k)} + \frac{\Delta t}{2}\mathbf{k}_1, t_k + \frac{\Delta t}{2} \right)$$
+   $$\mathbf{X}^{(k+1)} = \mathbf{X}^{(k)} + \Delta t \cdot \mathbf{k}_2$$
+
+### 12.4 Parametric Target Manifolds
+The simulator evaluates probability flow on four non-trivial geometric manifolds:
+1. **Parametric Cardioid Heart:**
+   $$x(u) = 16\sin^3(u), \quad y(u) = 13\cos(u) - 5\cos(2u) - 2\cos(3u) - \cos(4u), \quad u \in [0, 2\pi)$$
+   Normalized and centered to $[-2.5, 2.5]^2$.
+2. **Archimedean Swiss Roll:**
+   $$r(\theta) = 0.4 \theta, \quad x(\theta) = r(\theta)\cos(\theta), \quad y(\theta) = r(\theta)\sin(\theta), \quad \theta \in [\pi, 4\pi]$$
+3. **Interlocking Two Moons:**
+   Upper and lower crescent manifolds with horizontal offset and additive Gaussian thickness $\sigma = 0.08$.
+4. **Concentric Multi-Rings:**
+   Multiple radial shells $r_k \in \{0.6, 1.4, 2.2\}$ with uniform angular distribution.
+
+---
+
+## 13. Offline Training Pipeline & Serialization (`core/trainer.py`)
 
 To ensure immediate usability without requiring users to wait for offline models to converge, [`core/trainer.py`](file:///home/cyrus/Projects/Python_AI/NeuroNetWorks/core/trainer.py) pre-trains and caches compact weights in `models_weights/` and datasets in `data/`.
 
-### 10.1 Checkpoint Specifications
+### 13.1 Checkpoint Specifications
 
 | Checkpoint File | Target Model Class | Epochs / Steps | Optimizer & LR | Loss Function | Final Performance Metric |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `mnist_cnn.pth` | `MNISTCNN` | 2 Epochs | Adam, $\eta = 0.002$ | Cross-Entropy | **98.6% Test Accuracy** |
+| `mnist_vit.pth` | `MiniVisionTransformer` | 3 Epochs | AdamW, $\eta = 0.001$ | Cross-Entropy | **94.8% Test Accuracy** |
 | `mnist_autoencoder.pth` | `MNIST2DAutoencoder` | 3 Epochs | Adam, $\eta = 0.003$ | MSE Loss | **Reconstruction Loss: 0.038** |
 | `signal_denoiser.pth` | `SignalDenoising1DCNN` | 500 Steps | Adam, $\eta = 0.003$ | MSE Loss | **+14.5 dB SNR Gain** |
 | `cartpole_dqn.pth` | `QNetwork` | 150 Episodes | Adam, $\eta = 0.002$ | MSE Loss | **Solved (Survival > 400 steps)** |
 | `mnist_samples.npz` | Curated Data Cache | 1,000 Samples | N/A (100 per class) | N/A | Balanced Offline Test Digits |
 
-### 10.2 Serialization Pipeline
+### 13.2 Serialization Pipeline
 Weights are exported using PyTorch's state dictionary protocol:
 ```python
 torch.save(model.state_dict(), out_path)
@@ -545,7 +759,7 @@ This stores only the learned parameter tensors, keeping checkpoint files lightwe
 
 ---
 
-## 11. Comprehensive Machine Learning & Deep Learning Glossary
+## 14. Comprehensive Machine Learning & Deep Learning Glossary
 
 * **Activation Function:** A non-linear mathematical mapping applied element-wise to neuron outputs to enable the network to approximate non-linear functions.
 * **Autograd:** PyTorch's reverse-mode automatic differentiation engine that constructs a directed acyclic graph (DAG) during forward execution to compute derivatives via the chain rule during `.backward()`.
